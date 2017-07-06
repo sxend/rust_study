@@ -4,6 +4,7 @@ machine:
 dependencies:
   override:
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
+    - echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.bashrc
 test:
   override:
     - cargo test
