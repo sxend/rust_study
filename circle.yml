@@ -3,7 +3,7 @@ machine:
      - docker
 dependencies:
   override:
-    - curl https://sh.rustup.rs -sSf | sh
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y
 test:
   override:
     - cargo test
