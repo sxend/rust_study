@@ -1,0 +1,9 @@
+machine:
+  services:
+     - docker
+dependencies:
+  override:
+    - curl https://sh.rustup.rs -sSf | sh
+test:
+  override:
+    - cargo test
