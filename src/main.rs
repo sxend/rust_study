@@ -6,8 +6,11 @@ extern crate serde_json;
 extern crate serde_derive;
 extern crate time;
 
+use std::io;
 use hyper::header::ContentLength;
 use hyper::server::{Http, Request, Response, Service};
+use futures::future::FutureResult;
+use futures::Map;
 
 #[derive(Serialize, Deserialize)]
 struct Metadata {
@@ -34,21 +37,29 @@ impl Service for Server {
     type Future = futures::future::FutureResult<Self::Response, Self::Error>;
 
     fn call(&self, _req: Request) -> Self::Future {
-        let timestamp = time::now_utc().to_timespec();
-        let data = ResponseData {
-          metadata: Metadata {
-            timestamp: (timestamp.sec * 1000) + (timestamp.nsec / 1000000) as i64
-          },
-            payload: Message {
-                message: "hello".to_string()
-            }
-        };
-        let body = serde_json::to_string(&data).unwrap();
-        futures::future::ok(
+        let data = gen_data();
+        let body = serialize_message(data);
+        body.map(|x| {
             Response::new()
-                .with_header(ContentLength(body.len() as u64))
-                .with_body(body)
-        )
+                .with_header(ContentLength(x.len() as u64))
+                .with_body(x)
+        })
+
+    }
+
+}
+fn serialize_message(data: ResponseData<Message>) -> FutureResult<String, serde_json::Error> {
+    futures::future::result(serde_json::to_string(&data))
+}
+fn gen_data() -> ResponseData<Message> {
+    let timestamp = time::now_utc().to_timespec();
+    ResponseData {
+        metadata: Metadata {
+            timestamp: (timestamp.sec * 1000) + (timestamp.nsec / 1000000) as i64
+        },
+        payload: Message {
+            message: "hello".to_string()
+        }
     }
 }
 
