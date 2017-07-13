@@ -9,8 +9,8 @@ extern crate time;
 use std::io;
 use hyper::header::ContentLength;
 use hyper::server::{Http, Request, Response, Service};
-use futures::future::FutureResult;
-use futures::Map;
+use futures::*;
+use futures::future::*;
 
 #[derive(Serialize, Deserialize)]
 struct Metadata {
@@ -31,22 +31,23 @@ struct Message {
 struct Server;
 
 impl Service for Server {
-    type Request = Request;
-    type Response = Response;
+    type Request = hyper::Request;
+    type Response = hyper::Response;
     type Error = hyper::Error;
-    type Future = futures::future::FutureResult<Self::Response, Self::Error>;
-
+    type Future = BoxFuture<Self::Response, Self::Error>;
     fn call(&self, _req: Request) -> Self::Future {
         let data = gen_data();
-        let body = serialize_message(data);
-        body.map(|x| {
-            Response::new()
-                .with_header(ContentLength(x.len() as u64))
-                .with_body(x)
-        })
-
+        serialize_message(data)
+            .map_err(|t| hyper::Error::Io(io::Error::from(t)))
+            .map(|x| wrap_response(x)).boxed()
     }
 
+}
+
+fn wrap_response(str: String) -> Response {
+    Response::new()
+        .with_header(ContentLength(str.len() as u64))
+        .with_body(str)
 }
 fn serialize_message(data: ResponseData<Message>) -> FutureResult<String, serde_json::Error> {
     futures::future::result(serde_json::to_string(&data))
