@@ -5,6 +5,8 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 extern crate time;
+extern crate tokio_core;
+extern crate tokio_io;
 
 use std::io;
 use hyper::header::ContentLength;
