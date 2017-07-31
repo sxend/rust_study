@@ -67,6 +67,7 @@ fn gen_data() -> ResponseData<Message> {
 }
 
 fn main() {
+    println!("run main");
     let addr = "127.0.0.1:3000".parse().unwrap();
     let server = Http::new().bind(&addr, || Ok(Server)).unwrap();
     server.run().unwrap();
