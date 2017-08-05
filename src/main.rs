@@ -37,23 +37,24 @@ impl Service for Server {
     type Response = hyper::Response;
     type Error = hyper::Error;
     type Future = BoxFuture<Self::Response, Self::Error>;
-    fn call(&self, _req: Request) -> Self::Future {
-        let data = gen_data();
-        serialize_message(data)
-            .map_err(|t| hyper::Error::Io(io::Error::from(t)))
-            .map(|x| wrap_response(x)).boxed()
+    fn call(&self, _: Request) -> Self::Future {
+        serialize_message(gen_data())
+            .map_err(|err| hyper::Error::Io(io::Error::from(err)))
+            .map(|data| wrap_response(data)).boxed()
     }
 
 }
 
-fn wrap_response(str: String) -> Response {
+fn wrap_response(data: String) -> Response {
     Response::new()
-        .with_header(ContentLength(str.len() as u64))
-        .with_body(str)
+        .with_header(ContentLength(data.len() as u64))
+        .with_body(data)
 }
+
 fn serialize_message(data: ResponseData<Message>) -> FutureResult<String, serde_json::Error> {
     futures::future::result(serde_json::to_string(&data))
 }
+
 fn gen_data() -> ResponseData<Message> {
     let timestamp = time::now_utc().to_timespec();
     ResponseData {
