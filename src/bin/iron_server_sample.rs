@@ -6,20 +6,24 @@ extern crate serde_json;
 extern crate serde_derive;
 extern crate time;
 
+use std::error::Error;
 use iron::*;
 use iron::headers::ContentType;
 use router::Router;
 
 fn main() {
     let mut router = Router::new();
-    router.get("/", handler, "top");
+    router.get("/", handler, "index");
     let chain = Chain::new(router);
     Iron::new(chain).http("localhost:3000").unwrap();
 }
 
 fn handler(_: &mut Request) -> IronResult<Response> {
     serde_json::to_string(&gen_data())
-        .map_err(|err| IronError::new(err, "server error"))
+        .map_err(|err| {
+            let description = err.description().to_string();
+            IronError::new(err, description)
+        })
         .map(|response| {
             Response::with((ContentType::json().0, status::Ok, response))
         })
