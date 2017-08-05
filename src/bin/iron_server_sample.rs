@@ -23,7 +23,7 @@ fn main() {
 }
 
 fn handler(req: &mut Request) -> IronResult<Response> {
-    serde_json::to_string(&gen_data(req))
+    serde_json::to_string(&gen_response_data(req))
         .map_err(|err| {
             let description = err.description().to_string();
             IronError::new(err, description)
@@ -44,7 +44,7 @@ fn gen_request_id(req: &mut Request) -> IronResult<()> {
     Ok(())
 }
 
-fn gen_data(req: &mut Request) -> ResponseData<Message> {
+fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
     ResponseData {
         metadata: Metadata {
             request_id: req.extensions.get::<RequestId>().unwrap().to_owned(),
@@ -58,7 +58,7 @@ fn gen_data(req: &mut Request) -> ResponseData<Message> {
 
 fn current_time_millis() -> i64 {
     let timestamp = time::now_utc().to_timespec();
-    (timestamp.sec * 1000) + (timestamp.nsec / 1000000) as i64
+    (timestamp.sec * 1000) + (timestamp.nsec as i64 / 1000000)
 }
 
 #[derive(Serialize, Deserialize)]
