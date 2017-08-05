@@ -23,7 +23,7 @@ fn main() {
 }
 
 fn handler(req: &mut Request) -> IronResult<Response> {
-    serde_json::to_string(&gen_response_data(req))
+    serde_json::to_string_pretty(&gen_response_data(req))
         .map_err(|err| {
             let description = err.description().to_string();
             IronError::new(err, description)
