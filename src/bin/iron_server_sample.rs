@@ -10,7 +10,7 @@ extern crate uuid;
 use std::error::Error;
 use iron::*;
 use iron::typemap::*;
-use iron::headers::ContentType;
+use iron::headers::*;
 use router::Router;
 use uuid::Uuid;
 
@@ -18,7 +18,7 @@ fn main() {
     let mut router = Router::new();
     router.get("/", handler, "index");
     let mut chain = Chain::new(router);
-    chain.link_before(gen_request_id);
+    chain.link_before(assign_request_id);
     Iron::new(chain).http("localhost:3000").unwrap();
 }
 
@@ -31,6 +31,13 @@ fn handler(req: &mut Request) -> IronResult<Response> {
         .map(|response| {
             Response::with((ContentType::json().0, status::Ok, response))
         })
+        .map(|mut response: Response| {
+            if !req.headers.has::<Cookie>() {
+                let cookie = format!("uid={}; Path=/; Domain=localhost; Max-Age={}", gen_uuid(), 3600);
+                response.headers.set(SetCookie(vec![cookie.to_string()]));
+            }
+            response
+        })
 }
 
 struct RequestId {}
@@ -39,9 +46,13 @@ impl Key for RequestId {
     type Value = String;
 }
 
-fn gen_request_id(req: &mut Request) -> IronResult<()> {
-    req.extensions.insert::<RequestId>(Uuid::new_v4().hyphenated().to_string());
+fn assign_request_id(req: &mut Request) -> IronResult<()> {
+    req.extensions.insert::<RequestId>(gen_uuid());
     Ok(())
+}
+
+fn gen_uuid() -> String {
+    Uuid::new_v4().hyphenated().to_string()
 }
 
 fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
