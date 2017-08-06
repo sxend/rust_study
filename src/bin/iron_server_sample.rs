@@ -9,7 +9,7 @@ extern crate uuid;
 
 use std::error::Error;
 use iron::*;
-use iron::typemap::*;
+use iron::typemap;
 use iron::headers::*;
 use router::Router;
 use uuid::Uuid;
@@ -29,7 +29,7 @@ fn handler(req: &mut Request) -> IronResult<Response> {
             IronError::new(err, description)
         })
         .map(|data| {
-            Response::with((ContentType::json().0, status::Ok, data))
+            Response::with((status::Ok, ContentType::json().0, data))
         })
         .map(|mut response: Response| {
             if !req.headers.has::<Cookie>() {
@@ -42,7 +42,7 @@ fn handler(req: &mut Request) -> IronResult<Response> {
 
 struct RequestId {}
 
-impl Key for RequestId {
+impl typemap::Key for RequestId {
     type Value = String;
 }
 
