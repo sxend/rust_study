@@ -2,7 +2,7 @@ machine:
   pre:
     - echo '' > $HOME/.gitconfig
   services:
-     - docker
+    - docker
 dependencies:
   override:
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
