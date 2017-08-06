@@ -16,7 +16,7 @@ use uuid::Uuid;
 
 fn main() {
     let mut router = Router::new();
-    router.get("/", handler, "index");
+    router.get("/", handler, "GET /");
     let mut chain = Chain::new(router);
     chain.link_before(assign_request_id);
     Iron::new(chain).http("localhost:3000").unwrap();
