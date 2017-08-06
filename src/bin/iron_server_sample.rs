@@ -28,8 +28,8 @@ fn handler(req: &mut Request) -> IronResult<Response> {
             let description = err.description().to_string();
             IronError::new(err, description)
         })
-        .map(|response| {
-            Response::with((ContentType::json().0, status::Ok, response))
+        .map(|data| {
+            Response::with((ContentType::json().0, status::Ok, data))
         })
         .map(|mut response: Response| {
             if !req.headers.has::<Cookie>() {
