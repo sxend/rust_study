@@ -17,8 +17,11 @@ use uuid::Uuid;
 fn main() {
     let mut router = Router::new();
     router.get("/", handler, "GET /");
+    router.get("/foo", handler, "GET /foo");
     let mut chain = Chain::new(router);
     chain.link_before(assign_request_id);
+    chain.link_before(authentication_filter);
+    chain.link_after(start_session);
     Iron::new(chain).http("localhost:3000").unwrap();
 }
 
@@ -31,13 +34,6 @@ fn handler(req: &mut Request) -> IronResult<Response> {
         .map(|data| {
             Response::with((status::Ok, ContentType::json().0, data))
         })
-        .map(|mut response: Response| {
-            if !req.headers.has::<Cookie>() {
-                let cookie = format!("uid={}; Path=/; Domain=localhost; Max-Age={}", gen_uuid(), 3600);
-                response.headers.set(SetCookie(vec![cookie.to_string()]));
-            }
-            response
-        })
 }
 
 struct RequestId {}
@@ -49,6 +45,24 @@ impl typemap::Key for RequestId {
 fn assign_request_id(req: &mut Request) -> IronResult<()> {
     req.extensions.insert::<RequestId>(gen_uuid());
     Ok(())
+}
+
+fn authentication_filter(req: &mut Request) -> IronResult<()> {
+    if req.url.path().as_slice() == [""] {
+        Ok(())
+    } else if let Some(_) = req.headers.get::<Cookie>() {
+        Ok(())
+    } else {
+        Err(IronError::new(StringError("authentication failed.".to_string()), status::BadRequest))
+    }
+}
+
+fn start_session(req: &mut Request, mut res: Response) -> IronResult<Response> {
+    if !req.headers.has::<Cookie>() {
+        let cookie = format!("sid={}; Path=/; Domain=localhost; Max-Age={}", gen_uuid(), 3600);
+        res.headers.set(SetCookie(vec![cookie.to_string()]));
+    }
+    Ok(res)
 }
 
 fn gen_uuid() -> String {
@@ -70,6 +84,19 @@ fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
 fn current_time_millis() -> i64 {
     let timestamp = time::now_utc().to_timespec();
     (timestamp.sec * 1000) + (timestamp.nsec as i64 / 1000000)
+}
+
+#[derive(Debug)]
+struct StringError(String);
+
+impl std::fmt::Display for StringError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, f)
+    }
+}
+
+impl Error for StringError {
+    fn description(&self) -> &str { &*self.0 }
 }
 
 #[derive(Serialize, Deserialize)]
