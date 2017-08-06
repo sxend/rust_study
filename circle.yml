@@ -1,4 +1,6 @@
 machine:
+  pre:
+    - echo '' > $HOME/.gitconfig
   services:
      - docker
 dependencies:
