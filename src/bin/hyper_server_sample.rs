@@ -40,6 +40,7 @@ impl Service for Server {
     fn call(&self, _: Request) -> Self::Future {
         serialize_message(gen_data())
             .map_err(|err| hyper::Error::Io(io::Error::from(err)))
+            .and_then(|data| {futures::future::result(Ok(data))})
             .map(|data| wrap_response(data)).boxed()
     }
 
