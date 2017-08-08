@@ -22,7 +22,8 @@ fn main() {
     chain.link_before(assign_request_id);
     chain.link_before(authentication_filter);
     chain.link_after(start_session);
-    Iron::new(chain).http("0.0.0.0:3000").unwrap();
+    let listen_address = std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
+    Iron::new(chain).http(listen_address).unwrap();
 }
 
 fn handler(req: &mut Request) -> IronResult<Response> {
