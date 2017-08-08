@@ -22,7 +22,7 @@ fn main() {
     chain.link_before(assign_request_id);
     chain.link_before(authentication_filter);
     chain.link_after(start_session);
-    Iron::new(chain).http("localhost:3000").unwrap();
+    Iron::new(chain).http("0.0.0.0:3000").unwrap();
 }
 
 fn handler(req: &mut Request) -> IronResult<Response> {
@@ -59,7 +59,7 @@ fn authentication_filter(req: &mut Request) -> IronResult<()> {
 
 fn start_session(req: &mut Request, mut res: Response) -> IronResult<Response> {
     if !req.headers.has::<Cookie>() {
-        let cookie = format!("sid={}; Path=/; Domain=localhost; Max-Age={}", gen_uuid(), 3600);
+        let cookie = format!("sid={}; Path=/; Domain=0.0.0.0; Max-Age={}", gen_uuid(), 3600);
         res.headers.set(SetCookie(vec![cookie.to_string()]));
     }
     Ok(res)
