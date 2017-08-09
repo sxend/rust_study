@@ -6,8 +6,12 @@ extern crate serde_json;
 extern crate serde_derive;
 extern crate time;
 extern crate uuid;
+extern crate futures;
 
+use futures::*;
+use futures::future::*;
 use std::error::Error;
+use std::convert::From;
 use iron::*;
 use iron::typemap;
 use iron::headers::*;
@@ -17,13 +21,19 @@ use uuid::Uuid;
 fn main() {
     let mut router = Router::new();
     router.get("/", handler, "GET /");
-    router.get("/foo", handler, "GET /foo");
+    router.get("/future", future_handler, "GET /future");
     let mut chain = Chain::new(router);
     chain.link_before(assign_request_id);
     chain.link_before(authentication_filter);
     chain.link_after(start_session);
     let listen_address = std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
     Iron::new(chain).http(listen_address).unwrap();
+}
+
+fn future_handler(_: &mut Request) -> IronResult<Response> {
+    let future =
+        futures::future::result(Ok(Response::with((status::Ok, "is future response".to_string()))));
+    IronResult::from(FutureToIronResult::from(future))
 }
 
 fn handler(req: &mut Request) -> IronResult<Response> {
@@ -98,6 +108,35 @@ impl std::fmt::Display for StringError {
 
 impl Error for StringError {
     fn description(&self) -> &str { &*self.0 }
+}
+
+struct FutureToIronResult {
+    e: Option<IronError>,
+    r: Option<Response>
+}
+
+impl From<FutureToIronResult> for IronResult<Response> {
+    fn from(intermediate: FutureToIronResult) -> IronResult<Response> {
+        if intermediate.r.is_some() {
+            Ok(intermediate.r.unwrap())
+        } else {
+            Err(intermediate.e.unwrap())
+        }
+    }
+}
+impl From<FutureResult<Response, IronError>> for FutureToIronResult {
+    fn from(mut result: FutureResult<Response, IronError>) -> Self {
+        match result.poll().unwrap() {
+            Async::Ready(t) => FutureToIronResult {
+                r: Some(t),
+                e: None
+            },
+            Async::NotReady => FutureToIronResult {
+                r: None,
+                e: Some(IronError::new(StringError("error".to_string()), "error"))
+            }
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
