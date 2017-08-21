@@ -17,7 +17,7 @@ fn main() {
 }
 
 fn task(name: &str) -> Result<String, String> {
-    Ok::<String, String>(format!("task: [{}]. finish in thread: {}", name, current_thread_name()))
+    Ok(format!("task: [{}]. finish in thread: {}", name, current_thread_name()))
 }
 
 fn current_thread_name() -> String {
