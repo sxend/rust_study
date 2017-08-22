@@ -13,11 +13,7 @@ fn main() {
 /// nano template engine (https://github.com/trix/nano)
 /// # Example
 /// use
-pub fn nano(template: String, data: HashMap<String, String>) -> String {
-    unimplemented!()
-}
-
-pub fn nano_with_data(template: String, nanodata: NanoData) -> String {
+pub fn nano(template: String, nanodata: NanoData) -> String {
     Regex::new(r"\{([\w\.]*)\}").unwrap().replace_all(template.as_str(), move |cap: &Captures| {
         nanodata.get(cap.index(1).to_string())
     }).to_string()
@@ -57,15 +53,9 @@ impl NanoData {
         if keys.len() == 1 {
             (*self.underlying).borrow_mut().insert(keys.index(0).to_owned(), value);
         } else {
-            let key_chain = keys.split_first().unwrap().1.to_vec();
-            if let Some(_) = (*self.children).borrow().get(keys.index(0)) {
-                let &mut child = &mut (*self.children).borrow().get(keys.index(0)).unwrap();
-                child.put_with_keys(&key_chain, value);
-            } else {
-                let mut child = NanoData::new();
-                child.put_with_keys(&key_chain, value);
-                (*self.children).borrow_mut().insert(keys.index(0).to_owned(), child);
-            }
+            (*self.children).borrow_mut()
+                .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
+                .put_with_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
 
@@ -87,6 +77,6 @@ mod tests {
         data.put("string_data".to_string(), "string data".to_string());
         data.put("nested.data0".to_string(), "nested data0".to_string());
         data.put("nested.data1".to_string(), "nested data1".to_string());
-        ::nano_with_data(template, data);
+        println!("{}", ::nano(template, data));
     }
 }
