@@ -17,3 +17,4 @@ iron = "0.5.1"
 router = "0.5.1"
 uuid = { version = "0.5.1", features = ["serde", "v4"] }
 regex = "0.2.2"
+docopt = "0.8.1"
