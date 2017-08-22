@@ -17,8 +17,13 @@ fn main() {
     let mut nested: HashMap<String, TemplateValue>  = HashMap::new();
     nested.insert("data".to_string(), TemplateValue::String("nested.data value".to_string()));
     data.insert("nested".to_string(), TemplateValue::Map(nested));
-    println!("{}", templating(template, TemplateValue::Map(data)));
+    println!("{}", templating(template.to_owned(), TemplateValue::Map(data)));
+    let mut map = HashMap::<String, String>::new();
+    map.insert("string_data".to_string(), "string data map".to_string());
+    map.insert("nested.data".to_string(), "nested data map".to_string());
+    println!("{}", templating_with_map(template.to_owned(), map))
 }
+
 fn templating(template: String, data: TemplateValue) -> String {
     let re = Regex::new(r"\{([\w\.]*)\}").unwrap();
     let result = re.replace_all(template.as_str(), |cap: &Captures| {
@@ -54,4 +59,12 @@ fn templating(template: String, data: TemplateValue) -> String {
 enum TemplateValue {
     String(String),
     Map(HashMap<String, TemplateValue>)
+}
+
+// simple hashmap data
+fn templating_with_map(template: String, data: HashMap<String, String>) -> String {
+    let placeholder_regex = Regex::new(r"\{([\w\.]*)\}").unwrap();
+    placeholder_regex.replace_all(template.as_str(), move |cap: &Captures| {
+        data.get(cap.index(1)).unwrap().to_owned()
+    }).to_string()
 }
