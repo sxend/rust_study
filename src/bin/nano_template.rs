@@ -44,16 +44,16 @@ impl NanoData {
     }
     fn get_with_keys(&self, keys: &Vec<String>) -> String {
         if keys.len() == 1 {
-            (*self.underlying).borrow().get(keys.index(0)).unwrap().to_string()
+            self.underlying.borrow().get(keys.index(0)).unwrap().to_string()
         } else {
-            (*self.children).borrow().get(keys.index(0)).unwrap().get_with_keys(&keys.split_first().unwrap().1.to_vec())
+            self.children.borrow().get(keys.index(0)).unwrap().get_with_keys(&keys.split_first().unwrap().1.to_vec())
         }
     }
     fn put_with_keys(&mut self, keys: &Vec<String>, value: String) {
         if keys.len() == 1 {
-            (*self.underlying).borrow_mut().insert(keys.index(0).to_owned(), value);
+            self.underlying.borrow_mut().insert(keys.index(0).to_owned(), value);
         } else {
-            (*self.children).borrow_mut()
+            self.children.borrow_mut()
                 .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
                 .put_with_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
