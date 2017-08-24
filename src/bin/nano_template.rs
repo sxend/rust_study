@@ -88,25 +88,20 @@ mod tests {
     #[test]
     fn it_works() {
         let template: String = "\
-    hoge
-        fuga
-    [{string_data}]
-    [{nested}]
-    [{nested.data0}]
-    [{nested.data1}]
-    [{foo.data.put_data}]
-    [{foo}]
-        fizz
+=======
+a => {a}
+a.b => {a.b}
+a.b.c => {a.b.c}
+=======
     ".to_string();
         let mut data = ::NanoData::new();
-        data.put("string_data".to_string(), "string data".to_string());
-        data.put("nested".to_string(), "nested value".to_string());
-        data.put("nested.data0".to_string(), "nested data0".to_string());
-        data.put("nested.data1".to_string(), "nested data1".to_string());
-        data.put("foo".to_string(), "foo value".to_string());
-        let mut put_data = ::NanoData::new();
-        put_data.put("put_data".to_string(), "put value".to_string());
-        data.put_data("foo.data".to_string(), put_data);
+        data.put("a".to_string(), "a value".to_string());
+        let mut a = ::NanoData::new();
+        a.put("b".to_string(), "a.b value".to_string());
+        let mut b = ::NanoData::new();
+        b.put("c".to_string(), "a.b.c value".to_string());
+        data.put_data("a".to_string(), a);
+        data.put_data("a.b".to_string(), b);
         println!("{}", ::nano(template, data));
     }
 }
