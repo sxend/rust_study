@@ -63,7 +63,7 @@ impl NanoData {
         self.put_data_by_keys(&NanoData::split_key(key), value);
     }
     fn get_data_by_keys(&self, keys: &Vec<String>) -> NanoData {
-        let mut borrowed = (*self.children).borrow().get(keys.index(0)).unwrap().clone();
+        let mut borrowed = self.children.borrow().get(keys.index(0)).unwrap().clone();
         if keys.len() != 1 {
             borrowed = borrowed.get_data_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
