@@ -3,8 +3,6 @@ extern crate regex;
 use regex::{Regex, Captures};
 use std::collections::HashMap;
 use std::ops::Index;
-use std::rc::*;
-use std::cell::*;
 
 
 fn main() {
@@ -19,19 +17,17 @@ pub fn nano(template: String, nanodata: NanoData) -> String {
     }).to_string()
 }
 
-type HashRef<T> = Rc<RefCell<HashMap<String, T>>>;
-
 #[derive(Debug, Clone)]
 pub struct NanoData {
-    underlying: HashRef<String>,
-    children: HashRef<NanoData>
+    underlying: HashMap<String, String>,
+    children: HashMap<String, NanoData>
 }
 
 impl NanoData {
     pub fn new() -> NanoData {
         NanoData {
-            underlying: Rc::new(RefCell::new(HashMap::new())),
-            children: Rc::new(RefCell::new(HashMap::new()))
+            underlying: HashMap::new(),
+            children: HashMap::new()
         }
     }
     pub fn get(&self, key: String) -> String {
@@ -42,16 +38,16 @@ impl NanoData {
     }
     fn get_by_keys(&self, keys: &Vec<String>) -> String {
         if keys.len() == 1 {
-            self.underlying.borrow().get(keys.index(0)).unwrap().to_string()
+            self.underlying.get(keys.index(0)).unwrap().to_string()
         } else {
-            self.children.borrow().get(keys.index(0)).unwrap().get_by_keys(&keys.split_first().unwrap().1.to_vec())
+            self.children.get(keys.index(0)).unwrap().get_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
     }
     fn put_by_keys(&mut self, keys: &Vec<String>, value: String) {
         if keys.len() == 1 {
-            self.underlying.borrow_mut().insert(keys.index(0).to_owned(), value);
+            self.underlying.insert(keys.index(0).to_owned(), value);
         } else {
-            self.children.borrow_mut()
+            self.children
                 .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
                 .put_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
@@ -63,7 +59,7 @@ impl NanoData {
         self.put_data_by_keys(&NanoData::split_key(key), value);
     }
     fn get_data_by_keys(&self, keys: &Vec<String>) -> NanoData {
-        let mut borrowed = self.children.borrow().get(keys.index(0)).unwrap().clone();
+        let mut borrowed = self.children.get(keys.index(0)).unwrap().clone();
         if keys.len() != 1 {
             borrowed = borrowed.get_data_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
@@ -71,9 +67,9 @@ impl NanoData {
     }
     fn put_data_by_keys(&mut self, keys: &Vec<String>, value: NanoData) {
         if keys.len() == 1 {
-            self.children.borrow_mut().insert(keys.index(0).to_owned(), value);
+            self.children.insert(keys.index(0).to_owned(), value);
         } else {
-            self.children.borrow_mut()
+            self.children
                 .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
                 .put_data_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
