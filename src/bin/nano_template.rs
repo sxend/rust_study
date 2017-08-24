@@ -36,26 +36,26 @@ impl NanoData {
     }
     pub fn get(&self, key: String) -> String {
         let key_chain = key.split(".").map(|s| s.to_string()).collect();
-        self.get_by_keys_vec(&key_chain)
+        self.get_by_keys(&key_chain)
     }
     pub fn put(&mut self, key: String, value: String) {
         let key_chain = key.split(".").map(|s| s.to_string()).collect();
-        self.put_by_keys_vec(&key_chain, value);
+        self.put_by_keys(&key_chain, value);
     }
-    fn get_by_keys_vec(&self, keys: &Vec<String>) -> String {
+    fn get_by_keys(&self, keys: &Vec<String>) -> String {
         if keys.len() == 1 {
             self.underlying.borrow().get(keys.index(0)).unwrap().to_string()
         } else {
-            self.children.borrow().get(keys.index(0)).unwrap().get_by_keys_vec(&keys.split_first().unwrap().1.to_vec())
+            self.children.borrow().get(keys.index(0)).unwrap().get_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
     }
-    fn put_by_keys_vec(&mut self, keys: &Vec<String>, value: String) {
+    fn put_by_keys(&mut self, keys: &Vec<String>, value: String) {
         if keys.len() == 1 {
             self.underlying.borrow_mut().insert(keys.index(0).to_owned(), value);
         } else {
             self.children.borrow_mut()
                 .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
-                .put_by_keys_vec(&keys.split_first().unwrap().1.to_vec(), value);
+                .put_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
 
