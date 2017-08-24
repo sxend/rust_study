@@ -86,7 +86,22 @@ impl NanoData {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
+    fn with_put() {
+        let template: String = "\
+=======
+a => {a}
+a.b => {a.b}
+a.b.c => {a.b.c}
+=======
+    ".to_string();
+        let mut data = ::NanoData::new();
+        data.put("a".to_string(), "a value".to_string());
+        data.put("a.b".to_string(), "a.b value".to_string());
+        data.put("a.b.c".to_string(), "a.b.c value".to_string());
+        println!("{}", ::nano(template, data));
+    }
+    #[test]
+    fn with_put_data() {
         let template: String = "\
 =======
 a => {a}
