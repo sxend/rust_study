@@ -10,6 +10,7 @@ use tokio_core::net::TcpListener;
 use tokio_core::reactor::Core;
 use futures_cpupool::Builder;
 use std::io::Read;
+use std::io::BufReader;
 use std::error::Error;
 
 fn main() {
@@ -20,24 +21,25 @@ fn main() {
     let tcp = TcpListener::bind(&addr, &handle).unwrap();
     let server = tcp.incoming()
         .for_each(move |(mut tcp, _)| {
-            // let (mut reader, writer) = tcp.split();
-            let result = io::read_exact(tcp, vec![0u8]).and_then(|(conn, buf)| {
-                println!("{:?}", std::str::from_utf8(&buf));
+            let (reader, writer) = tcp.split();
+            let reader = BufReader::new(reader);
+            let result = io::read_until(reader, b'\n', vec![0u8]).and_then(|(conn, buf)| {
+                println!("{}", std::str::from_utf8(&buf).unwrap());
                 Ok((conn, buf))
             }).boxed();
             let result = result.and_then(|(conn, buf)| {
-                io::read_exact(conn, vec![0u8; 8]).and_then(|(conn, buf)| {
-                   println!("{:?}", std::str::from_utf8(&buf));
+                io::read_until(conn, b'\n', vec![0u8]).and_then(|(conn, buf)| {
+                    println!("{}", std::str::from_utf8(&buf).unwrap());
                     Ok((conn, buf))
                 })
             }).boxed();
             let result = result.and_then(|(conn, buf)| {
-                io::read_exact(conn, vec![0u8; 8]).and_then(|(conn, buf)| {
-                    println!("{:?}", std::str::from_utf8(&buf));
+                io::read_until(conn, b'\n', vec![0u8]).and_then(|(conn, buf)| {
+                    println!("{}", std::str::from_utf8(&buf).unwrap());
                     Ok((conn, buf))
                 })
             }).map(|(conn, buf)| {
-                println!("{:?}", std::str::from_utf8(&buf))
+                println!("{}", std::str::from_utf8(&buf).unwrap())
             }).boxed();
             let result = result.map_err(|err| {
                 println!("IO error {:?}", err)
