@@ -8,12 +8,10 @@ use futures::{Future, Stream};
 use tokio_io::{io, AsyncRead};
 use tokio_core::net::TcpListener;
 use tokio_core::reactor::Core;
-use futures_cpupool::Builder;
 use std::io::BufReader;
 use std::io::Write;
 
 fn main() {
-//    let pool = Builder::new().pool_size(2).name_prefix("mitm").create();
     let addr = "0.0.0.0:8888".parse().unwrap();
     let mut core = Core::new().unwrap();
     let handle = core.handle();
@@ -37,9 +35,10 @@ fn main() {
                 }).boxed();
                 count = count + 1;
             }
-            let result = result.map(move |(_, line)| {
-                writer.write(line.as_bytes());
-                println!("{}", line)
+            let result = result.and_then(move |(_, line)| {
+                writer.write(line.as_bytes()).map(move |_| {
+                    println!("{}", line)
+                })
             }).map_err(|err| {
                 println!("IO error {:?}", err)
             }).boxed();
