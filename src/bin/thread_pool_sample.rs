@@ -1,4 +1,3 @@
-
 extern crate futures;
 extern crate futures_cpupool;
 

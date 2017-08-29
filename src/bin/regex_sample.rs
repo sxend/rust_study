@@ -12,9 +12,9 @@ fn main() {
     [{nested.data}]
         fizz
     ".to_string();
-    let mut data: HashMap<String, TemplateValue>  = HashMap::new();
+    let mut data: HashMap<String, TemplateValue> = HashMap::new();
     data.insert("string_data".to_string(), TemplateValue::String("string_data value".to_string()));
-    let mut nested: HashMap<String, TemplateValue>  = HashMap::new();
+    let mut nested: HashMap<String, TemplateValue> = HashMap::new();
     nested.insert("data".to_string(), TemplateValue::String("nested.data value".to_string()));
     data.insert("nested".to_string(), TemplateValue::Map(nested));
     println!("{}", templating(template.to_owned(), TemplateValue::Map(data)));
@@ -34,16 +34,16 @@ fn templating(template: String, data: TemplateValue) -> String {
             match temp_data {
                 &TemplateValue::Map(ref map) => {
                     match map.get(key) {
-                        Some(m@&TemplateValue::Map(_)) => {
+                        Some(m @ &TemplateValue::Map(_)) => {
                             temp_data = m
-                        },
+                        }
                         Some(&TemplateValue::String(ref s)) => {
                             result_string = s;
                             break;
                         }
                         None => panic!("key not found: {}", key)
                     }
-                },
+                }
                 &TemplateValue::String(ref s) => {
                     result_string = s;
                     break;

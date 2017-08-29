@@ -1,4 +1,3 @@
-
 #[macro_use]
 extern crate serde_derive;
 extern crate docopt;
@@ -44,6 +43,7 @@ Options:
     Proxy::run(args.clone());
     println!("{:?}", args);
 }
+
 struct Proxy {}
 
 impl Proxy {
@@ -56,6 +56,7 @@ impl Proxy {
         iron.http(format!("{}:{}", args.flag_webui_addr, args.flag_webui_port)).unwrap();
     }
 }
+
 fn handler(req: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::Ok, ContentType::html().0, "hello")))
 }

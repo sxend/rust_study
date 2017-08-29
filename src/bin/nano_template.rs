@@ -5,8 +5,7 @@ use std::collections::HashMap;
 use std::ops::Index;
 
 
-fn main() {
-}
+fn main() {}
 
 /// nano template engine (https://github.com/trix/nano)
 /// # Example
@@ -96,6 +95,7 @@ a.b.c => {a.b.c}
         data.put("a.b.c".to_string(), "a.b.c value".to_string());
         println!("{}", ::nano(template, data));
     }
+
     #[test]
     fn with_put_data() {
         let template: String = "\

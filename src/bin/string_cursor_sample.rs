@@ -1,4 +1,3 @@
-
 use std::io::{Cursor, BufRead};
 
 fn main() {
@@ -24,7 +23,7 @@ aaa = \"aaa\"
                 let line = line.replace(INCLUDE, "");
                 let line = line.trim();
                 println!("include: {}", &line[1..line.len() - 1]);
-            },
+            }
             _ => {
                 println!("normal line: {}", line);
             }

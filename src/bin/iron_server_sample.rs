@@ -124,6 +124,7 @@ impl From<FutureToIronResult> for IronResult<Response> {
         }
     }
 }
+
 impl From<FutureResult<Response, IronError>> for FutureToIronResult {
     fn from(mut result: FutureResult<Response, IronError>) -> Self {
         match result.poll().unwrap() {
