@@ -22,10 +22,10 @@ fn main() {
             let (reader, mut writer) = tcp.split();
             let result = read_lines(BufReader::new(reader), Vec::new())
                 .and_then(move |(_, lines)| {
-                    let newlines = lines.clone();
-                    let bytes = lines.iter().map(|ref mut line| line.as_bytes()).collect::<Vec<_>>();
-                    writer.write(bytes[0]).map(move |_| {
-                        println!("{:?}", newlines)
+                    writer.write(b"HTTP/1.0 200 OK\r\nConnection: Close\r\n")
+                        .map(move |_| {
+//                        println!("{:?}", newlines)
+                          ()
                     })
                 })
                 .map_err(|err| println!("IO error {:?}", err)).boxed();
