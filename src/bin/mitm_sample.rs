@@ -20,10 +20,13 @@ fn main() {
     let server = tcp.incoming()
         .for_each(move |(tcp, _)| {
             let (reader, mut writer) = tcp.split();
-            let reader: TcpReadBuffer = BufReader::new(reader);
-            let result = read_line_until_rn(reader)
-                .and_then(move |(_, line)| {
-                    writer.write(line.as_bytes()).map(move |_| println!("{}", line))
+            let result = read_lines(BufReader::new(reader), Vec::new())
+                .and_then(move |(_, lines)| {
+                    let newlines = lines.clone();
+                    let bytes = lines.iter().map(|ref mut line| line.as_bytes()).collect::<Vec<_>>();
+                    writer.write(bytes[0]).map(move |_| {
+                        println!("{:?}", newlines)
+                    })
                 })
                 .map_err(|err| println!("IO error {:?}", err)).boxed();
             handle.spawn(result);
@@ -32,9 +35,22 @@ fn main() {
     core.run(server).unwrap();
 }
 
-fn read_line_until_rn(reader: TcpReadBuffer) -> BoxFuture<(TcpReadBuffer, String), IoError> {
+fn read_lines(reader: TcpReadBuffer, lines: Vec<String>) -> BoxFuture<(TcpReadBuffer, Vec<String>), IoError> {
+    read_line_until_rn(reader, lines).and_then(|(reader, lines)| {
+        if lines.len() > 0 && lines[lines.len() - 1] == "\u{0}\r\u{0}\n" {
+            futures::future::result(Ok((reader, lines))).boxed()
+        } else {
+            read_lines(reader, lines)
+        }
+    }).boxed()
+}
+
+fn read_line_until_rn(reader: TcpReadBuffer, mut lines: Vec<String>) -> BoxFuture<(TcpReadBuffer, Vec<String>), IoError> {
     read_until_with_string(reader, b'\r').and_then(|(reader, line0)| {
-        read_until_with_string(reader, b'\n').map(move |(reader, line1)| (reader, line0 + line1.as_str()))
+        read_until_with_string(reader, b'\n').map(move |(reader, line1)| {
+            lines.push(format!("{}", line0 + line1.as_str()));
+            (reader, lines)
+        })
     }).boxed()
 }
 
