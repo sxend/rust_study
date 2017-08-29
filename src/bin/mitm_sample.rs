@@ -20,31 +20,30 @@ fn main() {
         .for_each(move |(tcp, _)| {
             let (reader, mut writer) = tcp.split();
             let reader = BufReader::new(reader);
-            let mut result = io::read_until(reader, b'\n', vec![0u8]).and_then(|(reader, buf)| {
-                Ok((reader, String::from_utf8(buf.to_vec()).unwrap()))
-            }).boxed();
+            let mut result = io::read_until(reader, b'\n', vec![0u8])
+                .and_then(|(reader, buf)| Ok((reader, String::from_utf8(buf.to_vec()).unwrap())))
+                .boxed();
             let mut count: i32 = 0;
             loop {
                 if count == 10 {
                     break;
                 }
                 result = result.and_then(|(reader, prev)| {
-                    io::read_until(reader, b'\n', vec![0u8]).and_then(|(reader, buf)| {
-                        Ok((reader, prev + String::from_utf8(buf.to_vec()).unwrap().as_str()))
+                        io::read_until(reader, b'\n', vec![0u8]).and_then(|(reader, buf)| {
+                            Ok((reader, prev + String::from_utf8(buf.to_vec()).unwrap().as_str()))
+                        })
                     })
-                }).boxed();
+                    .boxed();
                 count = count + 1;
             }
             let result = result.and_then(move |(_, line)| {
-                writer.write(line.as_bytes()).map(move |_| {
-                    println!("{}", line)
+                    writer.write(line.as_bytes()).map(move |_| println!("{}", line))
                 })
-            }).map_err(|err| {
-                println!("IO error {:?}", err)
-            }).boxed();
+                .map_err(|err| println!("IO error {:?}", err))
+                .boxed();
             handle.spawn(result);
             Ok(())
-    });
+        });
 
     core.run(server).unwrap();
 }
