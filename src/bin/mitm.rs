@@ -50,13 +50,13 @@ impl Proxy {
     fn run(args: Args) {
         let mut router = Router::new();
         router.get("/", handler, "GET /");
-        let mut chain = Chain::new(router);
+        let chain = Chain::new(router);
         let mut iron = Iron::new(chain);
         iron.threads = args.flag_webui_threads;
         iron.http(format!("{}:{}", args.flag_webui_addr, args.flag_webui_port)).unwrap();
     }
 }
 
-fn handler(req: &mut Request) -> IronResult<Response> {
+fn handler(_: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::Ok, ContentType::html().0, "hello")))
 }
