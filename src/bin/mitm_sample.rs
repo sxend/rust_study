@@ -5,7 +5,7 @@ extern crate tokio_io;
 
 use futures::{BoxFuture, Future, Stream};
 use tokio_io::{io, AsyncRead};
-use tokio_io::io::ReadHalf;
+use tokio_io::io::{ReadHalf, WriteHalf};
 use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::Core;
 use std::io::{BufReader, Write, ErrorKind as IoErrorKind, Error as IoError};
@@ -19,17 +19,18 @@ fn main() {
     let tcp = TcpListener::bind(&addr, &handle).unwrap();
     let server = tcp.incoming()
         .for_each(move |(tcp, _)| {
-            let (reader, mut writer) = tcp.split();
-            let mut write_response = move || {
-                writer.write(b"HTTP/1.0 200 OK\r\nConnection: Close\r\n").map(|_| ())
-            };
+            let (reader, writer) = tcp.split();
             let result = read_lines(BufReader::new(reader), Vec::new())
-                .and_then(move |_| write_response())
+                .and_then(move |_| write_response(writer))
                 .map_err(|err| println!("IO error {:?}", err)).boxed();
             handle.spawn(result);
             Ok(())
         });
     core.run(server).unwrap();
+}
+
+fn write_response(mut writer: WriteHalf<TcpStream>) -> Result<(), IoError> {
+    writer.write(b"HTTP/1.0 200 OK\r\nConnection: Close\r\n").map(|_| ())
 }
 
 fn read_lines(reader: TcpReadBuffer, lines: Vec<String>) -> BoxFuture<(TcpReadBuffer, Vec<String>), IoError> {
