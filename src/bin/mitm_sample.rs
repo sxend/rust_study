@@ -20,14 +20,11 @@ fn main() {
     let server = tcp.incoming()
         .for_each(move |(tcp, _)| {
             let (reader, mut writer) = tcp.split();
+            let mut write_response = move || {
+                writer.write(b"HTTP/1.0 200 OK\r\nConnection: Close\r\n").map(|_| ())
+            };
             let result = read_lines(BufReader::new(reader), Vec::new())
-                .and_then(move |(_, lines)| {
-                    writer.write(b"HTTP/1.0 200 OK\r\nConnection: Close\r\n")
-                        .map(move |_| {
-//                        println!("{:?}", newlines)
-                          ()
-                    })
-                })
+                .and_then(move |_| write_response())
                 .map_err(|err| println!("IO error {:?}", err)).boxed();
             handle.spawn(result);
             Ok(())
