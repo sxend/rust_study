@@ -6,5 +6,7 @@ jobs:
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
-      - run: ln -s /root/.cargo/bin/cargo /bin/cargo
-      - run: cargo test
+      - run: ln -s /root/.cargo/bin/rustup /bin/rustup && ln -s /root/.cargo/bin/cargo /bin/cargo
+      - run: rustup update && rustup install nightly && rustup run nightly cargo install --force rustfmt-nightly
+      - run: rustup run nightly cargo fmt
+      - run: rustup run nightly cargo test
