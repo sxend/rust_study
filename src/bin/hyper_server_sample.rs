@@ -36,12 +36,13 @@ impl Service for Server {
     type Request = hyper::Request;
     type Response = hyper::Response;
     type Error = hyper::Error;
-    type Future = BoxFuture<Self::Response, Self::Error>;
+    type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
     fn call(&self, _: Request) -> Self::Future {
-        serialize_message(gen_data())
+        let result = serialize_message(gen_data())
             .map_err(|err| hyper::Error::Io(io::Error::from(err)))
             .and_then(|data| { futures::future::result(Ok(data)) })
-            .map(|data| wrap_response(data)).boxed()
+            .map(|data| wrap_response(data));
+        Box::new(result)
     }
 }
 
