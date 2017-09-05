@@ -1,12 +1,11 @@
+extern crate futures;
 extern crate iron;
 extern crate router;
-extern crate serde;
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 extern crate time;
 extern crate uuid;
-extern crate futures;
 
 use futures::*;
 use futures::future::*;
@@ -26,13 +25,15 @@ fn main() {
     chain.link_before(assign_request_id);
     chain.link_before(authentication_filter);
     chain.link_after(start_session);
-    let listen_address = std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
+    let listen_address =
+        std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
     Iron::new(chain).http(listen_address).unwrap();
 }
 
 fn future_handler(_: &mut Request) -> IronResult<Response> {
-    let future =
-        futures::future::result(Ok(Response::with((status::Ok, "is future response".to_string()))));
+    let future = futures::future::result(Ok(Response::with(
+        (status::Ok, "is future response".to_string()),
+    )));
     IronResult::from(FutureToIronResult::from(future))
 }
 
@@ -64,13 +65,20 @@ fn authentication_filter(req: &mut Request) -> IronResult<()> {
     } else if let Some(_) = req.headers.get::<Cookie>() {
         Ok(())
     } else {
-        Err(IronError::new(StringError("authentication failed.".to_string()), status::BadRequest))
+        Err(IronError::new(
+            StringError("authentication failed.".to_string()),
+            status::BadRequest,
+        ))
     }
 }
 
 fn start_session(req: &mut Request, mut res: Response) -> IronResult<Response> {
     if !req.headers.has::<Cookie>() {
-        let cookie = format!("sid={}; Path=/; Domain=0.0.0.0; Max-Age={}", gen_uuid(), 3600);
+        let cookie = format!(
+            "sid={}; Path=/; Domain=0.0.0.0; Max-Age={}",
+            gen_uuid(),
+            3600
+        );
         res.headers.set(SetCookie(vec![cookie.to_string()]));
     }
     Ok(res)
@@ -84,11 +92,11 @@ fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
     ResponseData {
         metadata: Metadata {
             request_id: req.extensions.get::<RequestId>().unwrap().to_owned(),
-            timestamp: current_time_millis()
+            timestamp: current_time_millis(),
         },
         payload: Message {
-            message: "hello".to_string()
-        }
+            message: "hello".to_string(),
+        },
     }
 }
 
@@ -107,12 +115,14 @@ impl std::fmt::Display for StringError {
 }
 
 impl Error for StringError {
-    fn description(&self) -> &str { &*self.0 }
+    fn description(&self) -> &str {
+        &*self.0
+    }
 }
 
 struct FutureToIronResult {
     e: Option<IronError>,
-    r: Option<Response>
+    r: Option<Response>,
 }
 
 impl From<FutureToIronResult> for IronResult<Response> {
@@ -130,12 +140,12 @@ impl From<FutureResult<Response, IronError>> for FutureToIronResult {
         match result.poll().unwrap() {
             Async::Ready(t) => FutureToIronResult {
                 r: Some(t),
-                e: None
+                e: None,
             },
             Async::NotReady => FutureToIronResult {
                 r: None,
-                e: Some(IronError::new(StringError("error".to_string()), "error"))
-            }
+                e: Some(IronError::new(StringError("error".to_string()), "error")),
+            },
         }
     }
 }
@@ -143,7 +153,7 @@ impl From<FutureResult<Response, IronError>> for FutureToIronResult {
 #[derive(Serialize, Deserialize)]
 struct Metadata {
     request_id: String,
-    timestamp: i64
+    timestamp: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -154,5 +164,5 @@ struct ResponseData<A> {
 
 #[derive(Serialize, Deserialize)]
 struct Message {
-    message: String
+    message: String,
 }

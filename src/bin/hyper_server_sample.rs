@@ -1,12 +1,9 @@
-extern crate hyper;
 extern crate futures;
-extern crate serde;
-extern crate serde_json;
+extern crate hyper;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 extern crate time;
-extern crate tokio_core;
-extern crate tokio_io;
 
 use std::io;
 use hyper::header::ContentLength;
@@ -16,7 +13,7 @@ use futures::future::*;
 
 #[derive(Serialize, Deserialize)]
 struct Metadata {
-    timestamp: i64
+    timestamp: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -27,7 +24,7 @@ struct ResponseData<A> {
 
 #[derive(Serialize, Deserialize)]
 struct Message {
-    message: String
+    message: String,
 }
 
 struct Server;
@@ -36,11 +33,11 @@ impl Service for Server {
     type Request = hyper::Request;
     type Response = hyper::Response;
     type Error = hyper::Error;
-    type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
+    type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
     fn call(&self, _: Request) -> Self::Future {
         let result = serialize_message(gen_data())
             .map_err(|err| hyper::Error::Io(io::Error::from(err)))
-            .and_then(|data| { futures::future::result(Ok(data)) })
+            .and_then(|data| futures::future::result(Ok(data)))
             .map(|data| wrap_response(data));
         Box::new(result)
     }
@@ -60,11 +57,11 @@ fn gen_data() -> ResponseData<Message> {
     let timestamp = time::now_utc().to_timespec();
     ResponseData {
         metadata: Metadata {
-            timestamp: (timestamp.sec * 1000) + (timestamp.nsec / 1000000) as i64
+            timestamp: (timestamp.sec * 1000) + (timestamp.nsec / 1000000) as i64,
         },
         payload: Message {
-            message: "hello".to_string()
-        }
+            message: "hello".to_string(),
+        },
     }
 }
 

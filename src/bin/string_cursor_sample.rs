@@ -1,4 +1,4 @@
-use std::io::{Cursor, BufRead};
+use std::io::{BufRead, Cursor};
 
 fn main() {
     let target_str = "\
@@ -15,7 +15,8 @@ fn main() {
 
 aaa = \"aaa\"
 
-    ".to_string();
+    "
+        .to_string();
     let mut lines = Cursor::new(target_str).lines();
     while let Some(Ok(line)) = lines.next() {
         match line {

@@ -12,5 +12,9 @@ fn main() {
     } else {
         panic!("unexpected path: {:?}", include_line_path);
     };
-    println!("include_line_file: {:?}, exists: {}", include_line_path, include_line_path.exists());
+    println!(
+        "include_line_file: {:?}, exists: {}",
+        include_line_path,
+        include_line_path.exists()
+    );
 }
