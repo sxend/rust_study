@@ -1,12 +1,10 @@
-machine:
-  pre:
-    - echo '' > $HOME/.gitconfig
-  services:
-    - docker
-dependencies:
-  override:
-    - curl https://sh.rustup.rs -sSf | sh -s -- -y
-    - echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.bashrc
-test:
-  override:
-    - cargo test
+version: 2
+jobs:
+  build:
+    docker:
+      - image: sxend/ubuntu:16.04.4
+    steps:
+      - checkout
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
+      - run: echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.bashrc
+      - run: cargo test
