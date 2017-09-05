@@ -6,7 +6,5 @@ jobs:
     steps:
       - checkout
       - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
-      - run: echo 'export PATH=$PATH:/root/.cargo/bin' >> /root/.bashrc && tail /root/.bashrc
-      - run: echo $PATH
-      - run: ls -al /root/.cargo/bin
+      - run: ln -s /root/.cargo/bin/cargo /bin/cargo
       - run: cargo test
