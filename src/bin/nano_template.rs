@@ -1,6 +1,6 @@
 extern crate regex;
 
-use regex::{Regex, Captures};
+use regex::{Captures, Regex};
 use std::collections::HashMap;
 use std::ops::Index;
 
@@ -11,22 +11,25 @@ fn main() {}
 /// # Example
 /// use
 pub fn nano(template: String, nanodata: NanoData) -> String {
-    Regex::new(r"\{([\w\.]*)\}").unwrap().replace_all(template.as_str(), move |cap: &Captures| {
-        nanodata.get(cap.index(1).to_string())
-    }).to_string()
+    Regex::new(r"\{([\w\.]*)\}")
+        .unwrap()
+        .replace_all(template.as_str(), move |cap: &Captures| {
+            nanodata.get(cap.index(1).to_string())
+        })
+        .to_string()
 }
 
 #[derive(Debug, Clone)]
 pub struct NanoData {
     underlying: HashMap<String, String>,
-    children: HashMap<String, NanoData>
+    children: HashMap<String, NanoData>,
 }
 
 impl NanoData {
     pub fn new() -> NanoData {
         NanoData {
             underlying: HashMap::new(),
-            children: HashMap::new()
+            children: HashMap::new(),
         }
     }
     pub fn get(&self, key: String) -> String {
@@ -39,7 +42,10 @@ impl NanoData {
         if keys.len() == 1 {
             self.underlying.get(keys.index(0)).unwrap().to_string()
         } else {
-            self.children.get(keys.index(0)).unwrap().get_by_keys(&keys.split_first().unwrap().1.to_vec())
+            self.children
+                .get(keys.index(0))
+                .unwrap()
+                .get_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
     }
     fn put_by_keys(&mut self, keys: &Vec<String>, value: String) {
@@ -47,7 +53,8 @@ impl NanoData {
             self.underlying.insert(keys.index(0).to_owned(), value);
         } else {
             self.children
-                .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
+                .entry(keys.index(0).to_owned())
+                .or_insert(NanoData::new())
                 .put_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
@@ -69,7 +76,8 @@ impl NanoData {
             self.children.insert(keys.index(0).to_owned(), value);
         } else {
             self.children
-                .entry(keys.index(0).to_owned()).or_insert(NanoData::new())
+                .entry(keys.index(0).to_owned())
+                .or_insert(NanoData::new())
                 .put_data_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
@@ -88,7 +96,8 @@ a => {a}
 a.b => {a.b}
 a.b.c => {a.b.c}
 =======
-    ".to_string();
+    "
+            .to_string();
         let mut data = ::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
         data.put("a.b".to_string(), "a.b value".to_string());
@@ -104,7 +113,8 @@ a => {a}
 a.b => {a.b}
 a.b.c => {a.b.c}
 =======
-    ".to_string();
+    "
+            .to_string();
         let mut data = ::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
         let mut a = ::NanoData::new();

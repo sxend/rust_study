@@ -1,8 +1,9 @@
-#[macro_use]
-extern crate serde_derive;
+
 extern crate docopt;
 extern crate iron;
 extern crate router;
+#[macro_use]
+extern crate serde_derive;
 
 use iron::*;
 use iron::headers::*;
@@ -20,7 +21,8 @@ struct Args {
 
 fn main() {
     let home_dir = std::env::var("HOME").unwrap_or("/tmp".to_string());
-    let usage = format!("
+    let usage = format!(
+        "
 mitm
 
 Usage:
@@ -36,7 +38,9 @@ Options:
   --config-dir=<cd>     config save dir [default: {HOME}/.mitm].
   -h --help             Show this screen.
   --version             Show version.
-", HOME = home_dir);
+",
+        HOME = home_dir
+    );
     let args: Args = Docopt::new(usage)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
@@ -53,7 +57,8 @@ impl Proxy {
         let chain = Chain::new(router);
         let mut iron = Iron::new(chain);
         iron.threads = args.flag_webui_threads;
-        iron.http(format!("{}:{}", args.flag_webui_addr, args.flag_webui_port)).unwrap();
+        iron.http(format!("{}:{}", args.flag_webui_addr, args.flag_webui_port))
+            .unwrap();
     }
 }
 
