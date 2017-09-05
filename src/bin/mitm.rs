@@ -1,4 +1,3 @@
-
 extern crate docopt;
 extern crate iron;
 extern crate router;
