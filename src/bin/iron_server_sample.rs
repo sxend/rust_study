@@ -48,7 +48,7 @@ fn handler(req: &mut Request) -> IronResult<Response> {
         })
 }
 
-struct RequestId {}
+struct RequestId;
 
 impl typemap::Key for RequestId {
     type Value = String;
