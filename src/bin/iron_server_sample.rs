@@ -85,7 +85,7 @@ fn start_session(req: &mut Request, mut res: Response) -> IronResult<Response> {
 }
 
 fn gen_uuid() -> String {
-    Uuid::new_v4().hyphenated().to_string()
+    Uuid::new_v4().to_hyphenated().to_string()
 }
 
 fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
