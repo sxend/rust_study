@@ -25,9 +25,9 @@ fn main() {
 mitm
 
 Usage:
-  options_sample [--port=<p>] [--webui-addr=<wa>] [--webui-port=<wp>] [--webui-threads=<wt>]
-  options_sample (-h | --help)
-  options_sample --version
+  mitm [--port=<p>] [--webui-addr=<wa>] [--webui-port=<wp>] [--webui-threads=<wt>]
+  mitm (-h | --help)
+  mitm --version
 
 Options:
   --port=<p>            bind proxy port [default: 8889].

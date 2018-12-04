@@ -50,7 +50,7 @@ fn wrap_response(data: String) -> Response {
 }
 
 fn serialize_message(data: ResponseData<Message>) -> FutureResult<String, serde_json::Error> {
-    futures::future::result(serde_json::to_string(&data))
+    futures::future::result(serde_json::to_string_pretty(&data))
 }
 
 fn gen_data() -> ResponseData<Message> {
