@@ -1,6 +1,3 @@
-extern crate docopt;
-extern crate iron;
-extern crate router;
 #[macro_use]
 extern crate serde_derive;
 

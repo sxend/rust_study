@@ -1,7 +1,3 @@
-extern crate futures;
-extern crate tokio_core;
-extern crate tokio_io;
-
 use futures::{Future, Stream};
 use tokio_io::{io, AsyncRead};
 use tokio_io::io::{ReadHalf, WriteHalf};

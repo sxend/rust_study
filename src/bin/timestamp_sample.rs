@@ -1,5 +1,3 @@
-extern crate time;
-
 use std::ops::Add;
 
 fn main() {

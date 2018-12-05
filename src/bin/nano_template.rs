@@ -1,9 +1,6 @@
-extern crate regex;
-
 use regex::{Captures, Regex};
 use std::collections::HashMap;
 use std::ops::Index;
-
 
 fn main() {}
 

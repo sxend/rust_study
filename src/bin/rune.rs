@@ -1,10 +1,3 @@
-extern crate futures;
-extern crate iron;
-extern crate router;
-extern crate time;
-extern crate uuid;
-extern crate params;
-
 use iron::*;
 use router::Router;
 use params::{Params, Value};

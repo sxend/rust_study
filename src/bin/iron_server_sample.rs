@@ -1,11 +1,5 @@
-extern crate futures;
-extern crate iron;
-extern crate router;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
-extern crate time;
-extern crate uuid;
 
 use futures::*;
 use futures::future::*;

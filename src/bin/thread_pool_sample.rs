@@ -1,6 +1,3 @@
-extern crate futures;
-extern crate futures_cpupool;
-
 use futures::future::Future;
 use futures_cpupool::Builder;
 use std::thread;

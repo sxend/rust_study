@@ -1,5 +1,3 @@
-extern crate regex;
-
 use regex::{Captures, Regex};
 use std::ops::Index;
 use std::collections::HashMap;
