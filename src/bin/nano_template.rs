@@ -7,16 +7,16 @@ fn main() {}
 /// nano template engine (https://github.com/trix/nano)
 /// # Example
 /// use
-pub fn nano(template: String, nanodata: NanoData) -> String {
+pub fn nano(template: &str, nanodata: NanoData) -> String {
     Regex::new(r"\{([\w\.]*)\}")
         .unwrap()
-        .replace_all(template.as_str(), move |cap: &Captures| {
-            nanodata.get(cap.index(1).to_string())
+        .replace_all(template, move |cap: &Captures| {
+            nanodata.get(cap.index(1))
         })
         .to_string()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct NanoData {
     underlying: HashMap<String, String>,
     children: HashMap<String, NanoData>,
@@ -29,57 +29,55 @@ impl NanoData {
             children: HashMap::new(),
         }
     }
-    pub fn get(&self, key: String) -> String {
+    pub fn get(&self, key: &str) -> String {
         self.get_by_keys(&NanoData::split_key(key))
     }
-    pub fn put(&mut self, key: String, value: String) {
+    pub fn put(&mut self, key: &str, value: String) {
         self.put_by_keys(&NanoData::split_key(key), value);
     }
-    fn get_by_keys(&self, keys: &Vec<String>) -> String {
+    fn get_by_keys(&self, keys: &[String]) -> String {
         if keys.len() == 1 {
-            self.underlying.get(keys.index(0)).unwrap().to_string()
+            self.underlying[keys.index(0)].to_owned()
         } else {
-            self.children
-                .get(keys.index(0))
-                .unwrap()
-                .get_by_keys(&keys.split_first().unwrap().1.to_vec())
+            self.children[keys.index(0)]
+                .get_by_keys(&keys.split_first().unwrap().1.to_vec()).to_owned()
         }
     }
-    fn put_by_keys(&mut self, keys: &Vec<String>, value: String) {
+    fn put_by_keys(&mut self, keys: &[String], value: String) {
         if keys.len() == 1 {
             self.underlying.insert(keys.index(0).to_owned(), value);
         } else {
             self.children
                 .entry(keys.index(0).to_owned())
-                .or_insert(crate::NanoData::new())
+                .or_insert_with(crate::NanoData::new)
                 .put_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
-    pub fn get_data(&self, key: String) -> NanoData {
+    pub fn get_data(&self, key: &str) -> NanoData {
         self.get_data_by_keys(&NanoData::split_key(key))
     }
-    pub fn put_data(&mut self, key: String, value: NanoData) {
+    pub fn put_data(&mut self, key: &str, value: NanoData) {
         self.put_data_by_keys(&NanoData::split_key(key), value);
     }
-    fn get_data_by_keys(&self, keys: &Vec<String>) -> NanoData {
-        let mut borrowed = self.children.get(keys.index(0)).unwrap().clone();
+    fn get_data_by_keys(&self, keys: &[String]) -> NanoData {
+        let mut borrowed = self.children[keys.index(0)].clone();
         if keys.len() != 1 {
             borrowed = borrowed.get_data_by_keys(&keys.split_first().unwrap().1.to_vec())
         }
         borrowed
     }
-    fn put_data_by_keys(&mut self, keys: &Vec<String>, value: NanoData) {
+    fn put_data_by_keys(&mut self, keys: &[String], value: NanoData) {
         if keys.len() == 1 {
             self.children.insert(keys.index(0).to_owned(), value);
         } else {
             self.children
                 .entry(keys.index(0).to_owned())
-                .or_insert(crate::NanoData::new())
+                .or_insert_with(crate::NanoData::new)
                 .put_data_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
-    fn split_key(key: String) -> Vec<String> {
-        key.split(".").map(|s| s.to_string()).collect()
+    fn split_key(key: &str) -> Vec<String> {
+        key.split('.').map(|s| s.to_string()).collect()
     }
 }
 
@@ -87,39 +85,37 @@ impl NanoData {
 mod tests {
     #[test]
     fn with_put() {
-        let template: String = "\
+        let template = "\
 =======
 a => {a}
 a.b => {a.b}
 a.b.c => {a.b.c}
 =======
-    "
-        .to_string();
+    ";
         let mut data = crate::NanoData::new();
-        data.put("a".to_string(), "a value".to_string());
-        data.put("a.b".to_string(), "a.b value".to_string());
-        data.put("a.b.c".to_string(), "a.b.c value".to_string());
+        data.put("a", "a value".to_string());
+        data.put("a.b", "a.b value".to_string());
+        data.put("a.b.c", "a.b.c value".to_string());
         println!("{}", crate::nano(template, data));
     }
 
     #[test]
     fn with_put_data() {
-        let template: String = "\
+        let template = "\
 =======
 a => {a}
 a.b => {a.b}
 a.b.c => {a.b.c}
 =======
-    "
-        .to_string();
+    ";
         let mut data = crate::NanoData::new();
-        data.put("a".to_string(), "a value".to_string());
+        data.put("a", "a value".to_string());
         let mut a = crate::NanoData::new();
-        a.put("b".to_string(), "a.b value".to_string());
+        a.put("b", "a.b value".to_string());
         let mut b = crate::NanoData::new();
-        b.put("c".to_string(), "a.b.c value".to_string());
-        data.put_data("a".to_string(), a);
-        data.put_data("a.b".to_string(), b);
+        b.put("c", "a.b.c value".to_string());
+        data.put_data("a", a);
+        data.put_data("a.b", b);
         println!("{}", crate::nano(template, data));
     }
 }

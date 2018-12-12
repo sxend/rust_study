@@ -20,7 +20,7 @@ fn main() {
     chain.link_before(authentication_filter);
     chain.link_after(start_session);
     let listen_address =
-        std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
+        std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or_else(|_| "0.0.0.0:3000".to_owned());
     Iron::new(chain).http(listen_address).unwrap();
 }
 
@@ -53,9 +53,7 @@ fn assign_request_id(req: &mut Request) -> IronResult<()> {
 }
 
 fn authentication_filter(req: &mut Request) -> IronResult<()> {
-    if req.url.path().as_slice() == [""] {
-        Ok(())
-    } else if let Some(_) = req.headers.get::<Cookie>() {
+    if req.url.path().as_slice() == [""] || req.headers.get::<Cookie>().is_some() {
         Ok(())
     } else {
         Err(IronError::new(
@@ -95,7 +93,7 @@ fn gen_response_data(req: &mut Request) -> ResponseData<Message> {
 
 fn current_time_millis() -> i64 {
     let timestamp = time::now_utc().to_timespec();
-    (timestamp.sec * 1000) + (timestamp.nsec as i64 / 1000000)
+    (timestamp.sec * 1000) + (i64::from(timestamp.nsec) / 1_000_000)
 }
 
 #[derive(Debug)]

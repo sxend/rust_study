@@ -35,7 +35,7 @@ fn read_lines(
     lines: Vec<String>,
 ) -> Box<Future<Item = (TcpReadBuffer, Vec<String>), Error = IoError>> {
     let result = read_line_until_rn(reader, lines).and_then(|(reader, lines)| {
-        if lines.len() > 0 && lines[lines.len() - 1] == "\u{0}\r\u{0}\n" {
+        if !lines.is_empty() && lines[lines.len() - 1] == "\u{0}\r\u{0}\n" {
             Box::new(futures::future::result(Ok((reader, lines))))
         } else {
             read_lines(reader, lines)
@@ -50,7 +50,7 @@ fn read_line_until_rn(
 ) -> Box<Future<Item = (TcpReadBuffer, Vec<String>), Error = IoError>> {
     let result = read_until_with_string(reader, b'\r').and_then(|(reader, line0)| {
         read_until_with_string(reader, b'\n').map(move |(reader, line1)| {
-            lines.push(format!("{}", line0 + line1.as_str()));
+            lines.push(line0 + &line1);
             (reader, lines)
         })
     });

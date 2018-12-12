@@ -3,7 +3,7 @@ extern crate serde_derive;
 
 use docopt::Docopt;
 
-const USAGE: &'static str = "
+const USAGE: &str = "
 options sample command
 
 Usage:

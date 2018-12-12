@@ -8,7 +8,7 @@ fn main() {
     let mut router = Router::new();
     router.get("/", handler, "GET /");
     let listen_address =
-        std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or("0.0.0.0:3000".to_owned());
+        std::env::var("LISTEN_ADDRESS".to_owned()).unwrap_or_else(|_| "0.0.0.0:3000".to_owned());
     Iron::new(router).http(listen_address).unwrap();
 }
 
@@ -32,7 +32,7 @@ mod base_rune {
         "ᛡ", "ᛢ", "ᛣ", "ᛤ", "ᛥ", "ᛦ", "ᛧ", "ᛨ", "ᛩ", "ᛪ", "᛫", "᛬", "᛭",
         "ᛮ", "ᛯ", "ᛰ",
     ];
-    pub fn from_str(_str: &String) -> String {
+    pub fn from_str(_str: &str) -> String {
         CHARS.concat().to_string()
     }
 }

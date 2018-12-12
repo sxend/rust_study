@@ -7,7 +7,7 @@ fn main() {
     receiver(&Box::new("Box<String> message ".to_string()));
 }
 
-fn receiver(message: &Any) -> () {
+fn receiver(message: &Any) {
     if let Some(message) = message.downcast_ref::<&str>() {
         println!("&str: {}", message)
     }

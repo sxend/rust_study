@@ -16,7 +16,7 @@ struct Args {
 }
 
 fn main() {
-    let home_dir = std::env::var("HOME").unwrap_or("/tmp".to_string());
+    let home_dir = std::env::var("HOME").unwrap_or_else(|_| "/tmp".to_string());
     let usage = format!(
         "
 mitm
@@ -40,14 +40,14 @@ Options:
     let args: Args = Docopt::new(usage)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
-    Proxy::run(args.clone());
+    Proxy::run(&args);
     println!("{:?}", args);
 }
 
 struct Proxy {}
 
 impl Proxy {
-    fn run(args: Args) {
+    fn run(args: &Args) {
         let mut router = Router::new();
         router.get("/", handler, "GET /");
         let chain = Chain::new(router);

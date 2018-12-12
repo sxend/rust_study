@@ -32,4 +32,4 @@ aaa = \"aaa\"
     }
 }
 
-const INCLUDE: &'static str = "include";
+const INCLUDE: &str = "include";
