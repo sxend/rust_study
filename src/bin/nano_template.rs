@@ -10,9 +10,7 @@ fn main() {}
 pub fn nano(template: &str, nanodata: NanoData) -> String {
     Regex::new(r"\{([\w\.]*)\}")
         .unwrap()
-        .replace_all(template, move |cap: &Captures| {
-            nanodata.get(cap.index(1))
-        })
+        .replace_all(template, move |cap: &Captures| nanodata.get(cap.index(1)))
         .to_string()
 }
 
@@ -24,10 +22,7 @@ pub struct NanoData {
 
 impl NanoData {
     pub fn new() -> NanoData {
-        NanoData {
-            underlying: HashMap::new(),
-            children: HashMap::new(),
-        }
+        Default::default()
     }
     pub fn get(&self, key: &str) -> String {
         self.get_by_keys(&NanoData::split_key(key))
@@ -40,7 +35,8 @@ impl NanoData {
             self.underlying[keys.index(0)].to_owned()
         } else {
             self.children[keys.index(0)]
-                .get_by_keys(&keys.split_first().unwrap().1.to_vec()).to_owned()
+                .get_by_keys(&keys.split_first().unwrap().1.to_vec())
+                .to_owned()
         }
     }
     fn put_by_keys(&mut self, keys: &[String], value: String) {
