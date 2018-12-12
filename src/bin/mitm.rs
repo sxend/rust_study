@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate serde_derive;
 
-use iron::*;
-use iron::headers::*;
-use router::Router;
 use docopt::Docopt;
+use iron::headers::*;
+use iron::*;
+use router::Router;
 
 #[derive(Debug, Deserialize, Clone)]
 struct Args {

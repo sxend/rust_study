@@ -1,9 +1,9 @@
 use futures::{Future, Stream};
-use tokio_io::{io, AsyncRead};
-use tokio_io::io::{ReadHalf, WriteHalf};
+use std::io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Write};
 use tokio_core::net::{TcpListener, TcpStream};
 use tokio_core::reactor::Core;
-use std::io::{BufReader, Error as IoError, ErrorKind as IoErrorKind, Write};
+use tokio_io::io::{ReadHalf, WriteHalf};
+use tokio_io::{io, AsyncRead};
 
 type TcpReadBuffer = BufReader<ReadHalf<TcpStream>>;
 
@@ -61,9 +61,8 @@ fn read_until_with_string(
     reader: TcpReadBuffer,
     byte: u8,
 ) -> Box<Future<Item = (TcpReadBuffer, String), Error = IoError>> {
-    let result = io::read_until(reader, byte, vec![0u8]).and_then(|(reader, buf)| {
-        vec_to_string(buf.to_vec()).map(move |line| (reader, line))
-    });
+    let result = io::read_until(reader, byte, vec![0u8])
+        .and_then(|(reader, buf)| vec_to_string(buf.to_vec()).map(move |line| (reader, line)));
     Box::new(result)
 }
 

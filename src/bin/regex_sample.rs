@@ -1,6 +1,6 @@
 use regex::{Captures, Regex};
-use std::ops::Index;
 use std::collections::HashMap;
+use std::ops::Index;
 
 fn main() {
     let template = "\
@@ -10,7 +10,7 @@ fn main() {
     [{nested.data}]
         fizz
     "
-        .to_string();
+    .to_string();
     let mut data: HashMap<String, TemplateValue> = HashMap::new();
     data.insert(
         "string_data".to_string(),

@@ -1,14 +1,14 @@
 #[macro_use]
 extern crate serde_derive;
 
-use futures::*;
 use futures::future::*;
-use std::error::Error;
-use std::convert::From;
-use iron::*;
-use iron::typemap;
+use futures::*;
 use iron::headers::*;
+use iron::typemap;
+use iron::*;
 use router::Router;
+use std::convert::From;
+use std::error::Error;
 use uuid::Uuid;
 
 fn main() {
@@ -25,9 +25,10 @@ fn main() {
 }
 
 fn future_handler(_: &mut Request) -> IronResult<Response> {
-    let future = futures::future::result(Ok(Response::with(
-        (status::Ok, "is future response".to_string()),
-    )));
+    let future = futures::future::result(Ok(Response::with((
+        status::Ok,
+        "is future response".to_string(),
+    ))));
     IronResult::from(FutureToIronResult::from(future))
 }
 
@@ -37,9 +38,7 @@ fn handler(req: &mut Request) -> IronResult<Response> {
             let description = err.description().to_string();
             IronError::new(err, description)
         })
-        .map(|data| {
-            Response::with((status::Ok, ContentType::json().0, data))
-        })
+        .map(|data| Response::with((status::Ok, ContentType::json().0, data)))
 }
 
 struct RequestId;

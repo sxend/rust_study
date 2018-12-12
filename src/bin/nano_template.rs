@@ -94,7 +94,7 @@ a.b => {a.b}
 a.b.c => {a.b.c}
 =======
     "
-            .to_string();
+        .to_string();
         let mut data = crate::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
         data.put("a.b".to_string(), "a.b value".to_string());
@@ -111,7 +111,7 @@ a.b => {a.b}
 a.b.c => {a.b.c}
 =======
     "
-            .to_string();
+        .to_string();
         let mut data = crate::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
         let mut a = crate::NanoData::new();
