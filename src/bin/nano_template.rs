@@ -51,7 +51,7 @@ impl NanoData {
         } else {
             self.children
                 .entry(keys.index(0).to_owned())
-                .or_insert(NanoData::new())
+                .or_insert(crate::NanoData::new())
                 .put_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
@@ -74,7 +74,7 @@ impl NanoData {
         } else {
             self.children
                 .entry(keys.index(0).to_owned())
-                .or_insert(NanoData::new())
+                .or_insert(crate::NanoData::new())
                 .put_data_by_keys(&keys.split_first().unwrap().1.to_vec(), value);
         }
     }
@@ -95,11 +95,11 @@ a.b.c => {a.b.c}
 =======
     "
             .to_string();
-        let mut data = ::NanoData::new();
+        let mut data = crate::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
         data.put("a.b".to_string(), "a.b value".to_string());
         data.put("a.b.c".to_string(), "a.b.c value".to_string());
-        println!("{}", ::nano(template, data));
+        println!("{}", crate::nano(template, data));
     }
 
     #[test]
@@ -112,14 +112,14 @@ a.b.c => {a.b.c}
 =======
     "
             .to_string();
-        let mut data = ::NanoData::new();
+        let mut data = crate::NanoData::new();
         data.put("a".to_string(), "a value".to_string());
-        let mut a = ::NanoData::new();
+        let mut a = crate::NanoData::new();
         a.put("b".to_string(), "a.b value".to_string());
-        let mut b = ::NanoData::new();
+        let mut b = crate::NanoData::new();
         b.put("c".to_string(), "a.b.c value".to_string());
         data.put_data("a".to_string(), a);
         data.put_data("a.b".to_string(), b);
-        println!("{}", ::nano(template, data));
+        println!("{}", crate::nano(template, data));
     }
 }
